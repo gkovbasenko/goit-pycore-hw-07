@@ -42,15 +42,15 @@ pytest tests/address_book/test_commands.py::TestAddContactCommand -v
 
 ### Available Commands
 
-- `add <name> <phone>` — Create contact or add phone to existing
-- `change <name> <phone>` — Add phone to existing contact
-- `phone <name>` — Show contact's phones
-- `all` — Display all contacts
-- `add-birthday <name> <date>` — Add birthday (DD.MM.YYYY format)
-- `show-birthday <name>` — Show specific contact's birthday
-- `birthdays` — Show upcoming birthdays (next 7 days)
-- `hello` — Greeting
-- `close` / `exit` — Exit application
+- `hello` — Get a greeting from the bot
+- `add <name> [phone]` — Add a new contact or add phone to existing (phone is optional)
+- `change <name> <old_phone> <new_phone>` — Change phone number for a contact
+- `phone <name>` — Show phone numbers for a contact
+- `all` — Show all contacts in address book
+- `add-birthday <name> <DD.MM.YYYY>` — Add a birthday for a contact
+- `show-birthday <name>` — Show birthday for a contact
+- `birthdays` — Show upcoming birthdays in the next 7 days
+- `close` / `exit` — Quit the program
 
 ### Requirements
 
