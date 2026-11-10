@@ -8,11 +8,11 @@ def input_error(func):
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except ValueError:
-            return "Give me name and phone please."
+        except ValueError as e:
+            return str(e) if str(e) else "Invalid input. Please check your command."
         except KeyError:
             return "Contact not found."
         except IndexError:
-            return "Enter the argument for the command."
+            return "Invalid input. Please check your command."
 
     return inner

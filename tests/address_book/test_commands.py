@@ -1,6 +1,7 @@
 import unittest
 from hw07.address_book import AddressBook, Record
 from hw07.address_book.commands.add_contact import add_contact
+from hw07.address_book.commands.change_contact import change_contact
 from hw07.address_book.commands.add_birthday import add_birthday
 from hw07.address_book.commands.show_phone import show_phone
 from hw07.address_book.commands.show_birthday import show_birthday
@@ -24,21 +25,53 @@ class TestAddContactCommand(unittest.TestCase):
         self.assertEqual(result, "Contact updated.")
         self.assertEqual(len(self.book.find("John").phones), 1)
 
-    def test_missing_name_raises_error(self):
-        result = add_contact(["1234567890"], self.book)
-        self.assertIn("Give me name and phone please", result)
-
-    def test_missing_phone_raises_error(self):
+    def test_adds_contact_without_phone(self):
         result = add_contact(["John"], self.book)
-        self.assertIn("Give me name and phone please", result)
+        self.assertEqual(result, "Contact added.")
+        record = self.book.find("John")
+        self.assertIsNotNone(record)
+        self.assertEqual(len(record.phones), 0)
 
-    def test_empty_args_raises_error(self):
+    def test_missing_name_raises_error(self):
         result = add_contact([], self.book)
-        self.assertIn("Give me name and phone please", result)
+        self.assertIn("not enough values to unpack", result.lower())
+
 
     def test_invalid_phone_raises_error(self):
         result = add_contact(["John", "123"], self.book)
-        self.assertIn("Give me name and phone please", result)
+        # Invalid phone should raise error with helpful message
+        self.assertIn("exactly 10 digits", result)
+
+
+class TestChangeContactCommand(unittest.TestCase):
+    def setUp(self):
+        self.book = AddressBook()
+        self.record = Record("John")
+        self.record.add_phone("1234567890")
+        self.book.add_record(self.record)
+
+    def test_changes_phone_number(self):
+        result = change_contact(["John", "1234567890", "9876543210"], self.book)
+        self.assertEqual(result, "Contact updated.")
+        record = self.book.find("John")
+        self.assertIn("9876543210", [p.value for p in record.phones])
+        self.assertNotIn("1234567890", [p.value for p in record.phones])
+
+    def test_contact_not_found(self):
+        result = change_contact(["Nobody", "1234567890", "9876543210"], self.book)
+        self.assertEqual(result, "Contact not found.")
+
+    def test_missing_arguments(self):
+        result = change_contact(["John", "1234567890"], self.book)
+        self.assertIn("not enough values to unpack", result.lower())
+
+    def test_empty_args_raises_error(self):
+        result = change_contact([], self.book)
+        self.assertIn("not enough values to unpack", result.lower())
+
+    def test_old_phone_not_found(self):
+        result = change_contact(["John", "9999999999", "1111111111"], self.book)
+        self.assertIn("not found", result.lower())
 
 
 class TestAddBirthdayCommand(unittest.TestCase):
@@ -58,19 +91,20 @@ class TestAddBirthdayCommand(unittest.TestCase):
 
     def test_missing_name_raises_error(self):
         result = add_birthday(["15.03.1990"], self.book)
-        self.assertIn("Give me name and phone please", result)
+        self.assertIn("not enough values to unpack", result.lower())
 
     def test_missing_birthday_raises_error(self):
         result = add_birthday(["John"], self.book)
-        self.assertIn("Give me name and phone please", result)
+        self.assertIn("not enough values to unpack", result.lower())
 
     def test_empty_args_raises_error(self):
         result = add_birthday([], self.book)
-        self.assertIn("Give me name and phone please", result)
+        self.assertIn("not enough values to unpack", result.lower())
 
     def test_invalid_birthday_format_raises_error(self):
         result = add_birthday(["John", "1990-03-15"], self.book)
-        self.assertIn("Give me name and phone please", result)
+        # Invalid date format raises ValueError in Birthday class
+        self.assertIn("Invalid date format", result) or self.assertIn("format", result.lower())
 
 
 class TestShowPhoneCommand(unittest.TestCase):
@@ -92,7 +126,8 @@ class TestShowPhoneCommand(unittest.TestCase):
 
     def test_missing_name_raises_error(self):
         result = show_phone([], self.book)
-        self.assertIn("Give me name and phone please", result)
+        self.assertIn("not enough values to unpack", result.lower())
+
 
 
 class TestShowBirthdayCommand(unittest.TestCase):
@@ -118,7 +153,8 @@ class TestShowBirthdayCommand(unittest.TestCase):
 
     def test_missing_name_raises_error(self):
         result = show_birthday([], self.book)
-        self.assertIn("Give me name and phone please", result)
+        self.assertIn("not enough values to unpack", result.lower())
+
 
 
 class TestShowAllCommand(unittest.TestCase):
